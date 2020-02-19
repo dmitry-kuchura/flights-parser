@@ -7,14 +7,31 @@ import (
 	"net/http"
 	"strings"
 
-	"./models"
-
 	"github.com/PuerkitoBio/goquery"
 )
 
-type Plane models.Plane
-type TrafficHub models.TrafficHub
-type Flight models.Flight
+type Plane struct {
+	model    string
+	firstFly string
+	age      string
+	places   string
+}
+
+type TrafficHub struct {
+	name string
+	code string
+}
+
+type Flight struct {
+	number              string
+	info                Plane
+	arrivalTrafficHub   TrafficHub
+	departureTrafficHub TrafficHub
+	arrivalTime         string
+	departureTime       string
+	boardStatus         string
+	isCharter           bool
+}
 
 func goGet(data []byte) {
 	var flights []Flight
