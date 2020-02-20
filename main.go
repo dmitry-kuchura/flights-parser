@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"skyup/models"
@@ -82,9 +81,8 @@ func goGet(data []byte) {
 		})
 	})
 
-	databaseUrl := os.Getenv("database_url")
 	// Set client options
-	clientOptions := options.Client().ApplyURI(databaseUrl)
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
