@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -8,29 +9,31 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Plane struct {
-	model    string
-	firstFly string
-	age      string
-	places   string
+	Model    string
+	FirstFly string
+	Age      string
+	Places   string
 }
 
 type TrafficHub struct {
-	name string
-	code string
+	Name string
+	Code string
 }
 
 type Flight struct {
-	number              string
-	info                Plane
-	arrivalTrafficHub   TrafficHub
-	departureTrafficHub TrafficHub
-	arrivalTime         string
-	departureTime       string
-	boardStatus         string
-	isCharter           bool
+	Number              string
+	Info                Plane
+	DepartureTrafficHub TrafficHub
+	ArrivalTrafficHub   TrafficHub
+	DepartureTime       string
+	ArrivalTime         string
+	BoardStatus         string
+	IsCharter           bool
 }
 
 func goGet(data []byte) {
@@ -54,19 +57,19 @@ func goGet(data []byte) {
 			boardItem.Find(".flight-popup__cont").Each(func(i int, flightPlaneInfo *goquery.Selection) {
 				flightPlaneInfo.Find(".flight-popup__info").Each(func(i int, planeInfo *goquery.Selection) {
 					if 0 == i {
-						plane.model = planeInfo.Text()
+						plane.Model = planeInfo.Text()
 					}
 
 					if 1 == i {
-						plane.firstFly = planeInfo.Text()
+						plane.FirstFly = planeInfo.Text()
 					}
 
 					if 2 == i {
-						plane.age = planeInfo.Text()
+						plane.Age = planeInfo.Text()
 					}
 
 					if 3 == i {
-						plane.places = planeInfo.Text()
+						plane.Places = planeInfo.Text()
 					}
 				})
 			})
@@ -81,21 +84,63 @@ func goGet(data []byte) {
 			isCharter := boardItem.Find(".board__charter-text").Text()
 
 			flight := Flight{
-				number:              flightNumber,
-				info:                plane,
-				arrivalTrafficHub:   TrafficHub{code: arrivalTrafficHub, name: arrivalTrafficHubName[:strings.IndexByte(arrivalTrafficHubName, '(')]},
-				departureTrafficHub: TrafficHub{code: departureTrafficHub, name: departureTrafficHubName[:strings.IndexByte(departureTrafficHubName, '(')]},
-				arrivalTime:         arrivalTime,
-				departureTime:       departureTime,
-				boardStatus:         boardStatus,
-				isCharter:           len(isCharter) > 0,
+				Number:              flightNumber,
+				Info:                plane,
+				ArrivalTrafficHub:   TrafficHub{Code: arrivalTrafficHub, Name: strings.TrimSpace(arrivalTrafficHubName[:strings.IndexByte(arrivalTrafficHubName, '(')])},
+				DepartureTrafficHub: TrafficHub{Code: departureTrafficHub, Name: strings.TrimSpace(departureTrafficHubName[:strings.IndexByte(departureTrafficHubName, '(')])},
+				ArrivalTime:         arrivalTime,
+				DepartureTime:       departureTime,
+				BoardStatus:         boardStatus,
+				IsCharter:           len(isCharter) > 0,
 			}
 
 			flights = append(flights, flight)
 		})
 	})
 
-	fmt.Println("####### flights = ", len(flights), flights)
+	//fmt.Println("####### flights = ", len(flights), flights)
+
+	// Set client options
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
+
+	// Get a handle for your collection
+	collection := client.Database("skyup").Collection("flights")
+
+	// Insert a single document
+	for x := range flights {
+		row := Flight{
+			Number:              flights[x].Number,
+			Info:                flights[x].Info,
+			DepartureTrafficHub: flights[x].ArrivalTrafficHub,
+			ArrivalTrafficHub:   flights[x].DepartureTrafficHub,
+			DepartureTime:       flights[x].DepartureTime,
+			ArrivalTime:         flights[x].ArrivalTime,
+			BoardStatus:         flights[x].BoardStatus,
+		}
+		insertResult, err := collection.InsertOne(context.TODO(), row)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Inserted a single document: ", insertResult)
+	}
+
 }
 
 func main() {
