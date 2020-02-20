@@ -98,8 +98,6 @@ func goGet(data []byte) {
 		})
 	})
 
-	//fmt.Println("####### flights = ", len(flights), flights)
-
 	// Set client options
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
@@ -127,8 +125,8 @@ func goGet(data []byte) {
 		row := Flight{
 			Number:              flights[x].Number,
 			Info:                flights[x].Info,
-			DepartureTrafficHub: flights[x].ArrivalTrafficHub,
-			ArrivalTrafficHub:   flights[x].DepartureTrafficHub,
+			DepartureTrafficHub: flights[x].DepartureTrafficHub,
+			ArrivalTrafficHub:   flights[x].ArrivalTrafficHub,
 			DepartureTime:       flights[x].DepartureTime,
 			ArrivalTime:         flights[x].ArrivalTime,
 			BoardStatus:         flights[x].BoardStatus,
@@ -140,7 +138,6 @@ func goGet(data []byte) {
 		}
 		fmt.Println("Inserted a single document: ", insertResult)
 	}
-
 }
 
 func main() {
