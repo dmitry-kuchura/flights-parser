@@ -6,7 +6,7 @@ import (
 	"skyup/utils"
 )
 
-func Pluck() {
+func startWork() {
 	utils.Parse()
 }
 
@@ -16,6 +16,6 @@ func main() {
 	timerCh := time.Tick(time.Duration(pollInterval) * time.Millisecond)
 
 	for range timerCh {
-		Pluck()
+		startWork()
 	}
 }
