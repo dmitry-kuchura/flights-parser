@@ -1,1 +1,5 @@
+# GoLand files
 .idea
+
+# Configuration file
+.env

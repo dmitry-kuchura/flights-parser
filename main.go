@@ -6,35 +6,19 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
+
+	"skyup/models"
 
 	"github.com/PuerkitoBio/goquery"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Plane struct {
-	Model    string
-	FirstFly string
-	Age      string
-	Places   string
-}
-
-type TrafficHub struct {
-	Name string
-	Code string
-}
-
-type Flight struct {
-	Number              string
-	Info                Plane
-	DepartureTrafficHub TrafficHub
-	ArrivalTrafficHub   TrafficHub
-	DepartureTime       string
-	ArrivalTime         string
-	BoardStatus         string
-	IsCharter           bool
-}
+type Plane = models.Plane
+type TrafficHub = models.TrafficHub
+type Flight = models.Flight
 
 func goGet(data []byte) {
 	var flights []Flight
@@ -98,8 +82,9 @@ func goGet(data []byte) {
 		})
 	})
 
+	databaseUrl := os.Getenv("database_url")
 	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(databaseUrl)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
