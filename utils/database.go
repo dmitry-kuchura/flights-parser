@@ -42,7 +42,7 @@ func InsertOne(collection *Collection, flight Flight) {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 }
 
-func FindOne(collection *Collection, value string) {
+func FindOne(collection *Collection, value string) Flight {
 	var result Flight
 
 	filter := bson.D{{"Number", value}}
@@ -52,5 +52,5 @@ func FindOne(collection *Collection, value string) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Found a single document: %+v\n", result)
+	return result
 }

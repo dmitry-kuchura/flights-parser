@@ -99,7 +99,6 @@ func prepareData(data []byte) {
 
 	collection := GetConnection()
 
-	// Insert a single document
 	for x := range flights {
 		row := Flight{
 			Number:              flights[x].Number,
@@ -111,6 +110,12 @@ func prepareData(data []byte) {
 			BoardStatus:         flights[x].BoardStatus,
 		}
 
-		InsertOne(collection, row)
+		check := FindOne(collection, flights[x].Number)
+
+		if check.Number != "" {
+			InsertOne(collection, row)
+		} else {
+			UpdateOne(collection, row.Number, row)
+		}
 	}
 }
