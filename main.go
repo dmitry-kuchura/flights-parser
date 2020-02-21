@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"skyup/utils"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func syncFlights() {
@@ -23,6 +25,11 @@ func syncFlights() {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/flights", api.GetFlights).Methods("GET")
@@ -34,7 +41,7 @@ func main() {
 
 	fmt.Println(port)
 
-	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
+	err = http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
 	if err != nil {
 		fmt.Print(err)
 	}
