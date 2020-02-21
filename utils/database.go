@@ -7,11 +7,10 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Collection = mongo.Collection
-
-func UpdateOne(collection *Collection, value string, data Flight) {
+func UpdateOne(collection *mongo.Collection, value string, data Flight) {
 	filter := bson.D{{"number", value}}
 
 	update := bson.D{
@@ -28,7 +27,7 @@ func UpdateOne(collection *Collection, value string, data Flight) {
 	fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 }
 
-func InsertMany(collection *Collection, list Flight) {
+func InsertMany(collection *mongo.Collection, list Flight) {
 	flights := []interface{}{list}
 
 	insertManyResult, err := collection.InsertMany(context.TODO(), flights)
@@ -39,7 +38,7 @@ func InsertMany(collection *Collection, list Flight) {
 	fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs)
 }
 
-func InsertOne(collection *Collection, flight Flight) {
+func InsertOne(collection *mongo.Collection, flight Flight) {
 	insertResult, err := collection.InsertOne(context.TODO(), flight)
 	if err != nil {
 		log.Fatal(err)
@@ -48,10 +47,40 @@ func InsertOne(collection *Collection, flight Flight) {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 }
 
-func FindOne(collection *Collection, value string) (flight Flight, err error) {
+func FindOne(collection *mongo.Collection, value string) (flight Flight, err error) {
 	filter := bson.D{{"number", value}}
 
 	err = collection.FindOne(context.TODO(), filter).Decode(&flight)
 
 	return flight, err
+}
+
+func FindMany(collection *mongo.Collection) ([]*Flight, error) {
+	params := options.Find()
+	params.SetLimit(100)
+	filter := bson.M{}
+
+	var results []*Flight
+
+	cur, err := collection.Find(context.Background(), filter, params)
+
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem Flight
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		results = append(results, &elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the cursor once finished
+	cur.Close(context.TODO())
+
+	return results, err
 }
