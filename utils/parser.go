@@ -110,12 +110,12 @@ func prepareData(data []byte) {
 			BoardStatus:         flights[x].BoardStatus,
 		}
 
-		check := FindOne(collection, flights[x].Number)
+		_, err := FindOne(collection, flights[x].Number)
 
-		if check.Number != "" {
-			InsertOne(collection, row)
-		} else {
+		if err == nil {
 			UpdateOne(collection, row.Number, row)
+		} else {
+			InsertOne(collection, row)
 		}
 	}
 }

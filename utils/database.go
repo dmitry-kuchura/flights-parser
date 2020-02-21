@@ -12,9 +12,15 @@ import (
 type Collection = mongo.Collection
 
 func UpdateOne(collection *Collection, value string, data Flight) {
-	filter := bson.D{{"Number", value}}
+	filter := bson.D{{"number", value}}
 
-	updateResult, err := collection.UpdateOne(context.TODO(), filter, data)
+	update := bson.D{
+		{"$set", bson.D{
+			{"boardStatus", data.BoardStatus},
+		}},
+	}
+
+	updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,15 +48,10 @@ func InsertOne(collection *Collection, flight Flight) {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 }
 
-func FindOne(collection *Collection, value string) Flight {
-	var result Flight
+func FindOne(collection *Collection, value string) (flight Flight, err error) {
+	filter := bson.D{{"number", value}}
 
-	filter := bson.D{{"Number", value}}
+	err = collection.FindOne(context.TODO(), filter).Decode(&flight)
 
-	err := collection.FindOne(context.TODO(), filter).Decode(&result)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return result
+	return flight, err
 }

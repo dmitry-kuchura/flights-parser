@@ -10,7 +10,7 @@ func startWork() {
 }
 
 func main() {
-	pollInterval := 30000
+	pollInterval := 10000
 
 	timerCh := time.Tick(time.Duration(pollInterval) * time.Millisecond)
 
