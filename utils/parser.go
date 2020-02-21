@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,8 +10,6 @@ import (
 	"skyup/models"
 
 	"github.com/PuerkitoBio/goquery"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Plane = models.Plane
@@ -100,27 +97,7 @@ func prepareData(data []byte) {
 		})
 	})
 
-	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Connected to MongoDB!")
-
-	// Get a handle for your collection
-	collection := client.Database("skyup").Collection("flights")
+	collection := GetConnection()
 
 	// Insert a single document
 	for x := range flights {
@@ -133,11 +110,7 @@ func prepareData(data []byte) {
 			ArrivalTime:         flights[x].ArrivalTime,
 			BoardStatus:         flights[x].BoardStatus,
 		}
-		insertResult, err := collection.InsertOne(context.TODO(), row)
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Inserted a single document: ", insertResult)
+		InsertOne(collection, row)
 	}
 }

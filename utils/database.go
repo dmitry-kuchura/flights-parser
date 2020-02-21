@@ -11,7 +11,7 @@ import (
 
 type Collection = mongo.Collection
 
-func UpdateOne(collection *Collection, value *string, data *Flight) {
+func UpdateOne(collection *Collection, value string, data Flight) {
 	filter := bson.D{{"Number", value}}
 
 	updateResult, err := collection.UpdateOne(context.TODO(), filter, data)
@@ -22,7 +22,7 @@ func UpdateOne(collection *Collection, value *string, data *Flight) {
 	fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 }
 
-func InsertMany(collection *Collection, list *Flight) {
+func InsertMany(collection *Collection, list Flight) {
 	flights := []interface{}{list}
 
 	insertManyResult, err := collection.InsertMany(context.TODO(), flights)
@@ -33,7 +33,7 @@ func InsertMany(collection *Collection, list *Flight) {
 	fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs)
 }
 
-func InsertOne(collection *Collection, flight *Flight) {
+func InsertOne(collection *Collection, flight Flight) {
 	insertResult, err := collection.InsertOne(context.TODO(), flight)
 	if err != nil {
 		log.Fatal(err)
@@ -42,7 +42,7 @@ func InsertOne(collection *Collection, flight *Flight) {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 }
 
-func FindOne(collection *Collection, value *string) {
+func FindOne(collection *Collection, value string) {
 	var result Flight
 
 	filter := bson.D{{"Number", value}}

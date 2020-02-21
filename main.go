@@ -1,9 +1,8 @@
 package main
 
 import (
-	"time"
-
 	"skyup/utils"
+	"time"
 )
 
 func startWork() {
