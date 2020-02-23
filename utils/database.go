@@ -55,9 +55,53 @@ func FindOne(collection *mongo.Collection, value string) (flight Flight, err err
 	return flight, err
 }
 
-func FindMany(collection *mongo.Collection) ([]*Flight, error) {
+func FindMany(collection *mongo.Collection, value string) ([]*Flight, error) {
+	if value == "" {
+		return FindAll(collection)
+	}
+
 	params := options.Find()
 	params.SetLimit(100)
+	filter := []bson.M{bson.M{"departuretraffichub.code": "(" + value + ")"}, bson.M{"arrivaltraffichub.code": "(" + value + ")"}}
+
+	if value == "KBP" {
+		filter = []bson.M{
+			bson.M{"departuretraffichub.code": "(" + value + ")"},
+			bson.M{"arrivaltraffichub.code": "(" + value + " F)"},
+			bson.M{"departuretraffichub.code": "(" + value + ")"},
+			bson.M{"arrivaltraffichub.code": "(" + value + " F)"},
+		}
+	}
+
+	var results []*Flight
+
+	cur, err := collection.Find(context.Background(), bson.M{"$or": filter})
+
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem Flight
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		results = append(results, &elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the cursor once finished
+	cur.Close(context.TODO())
+
+	return results, err
+}
+
+func FindAll(collection *mongo.Collection) ([]*Flight, error) {
+	params := options.Find()
+	params.SetLimit(100)
+
 	filter := bson.M{}
 
 	var results []*Flight
