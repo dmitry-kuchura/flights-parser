@@ -33,6 +33,8 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/flights", api.GetFlights).Methods("GET")
+	router.HandleFunc("/api/flights/departed", api.GetDepartedFlights).Methods("GET")
+	router.HandleFunc("/api/flights/arrival", api.GetArrivalFlights).Methods("GET")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -41,7 +43,7 @@ func main() {
 
 	fmt.Println(port)
 
-	err = http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
+	err = http.ListenAndServe(":"+port, router)
 	if err != nil {
 		fmt.Print(err)
 	}

@@ -15,7 +15,7 @@ func UpdateOne(collection *mongo.Collection, value string, data Flight) {
 
 	update := bson.D{
 		{"$set", bson.D{
-			{"boardStatus", data.BoardStatus},
+			{"boardstatus", data.BoardStatus},
 		}},
 	}
 
@@ -76,6 +76,89 @@ func FindMany(collection *mongo.Collection, value string) ([]*Flight, error) {
 	var results []*Flight
 
 	cur, err := collection.Find(context.Background(), bson.M{"$or": filter})
+
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem Flight
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		results = append(results, &elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the cursor once finished
+	cur.Close(context.TODO())
+
+	return results, err
+}
+
+func FindDeparted(collection *mongo.Collection, value string) ([]*Flight, error) {
+	if value == "" {
+		return FindAll(collection)
+	}
+
+	params := options.Find()
+	params.SetLimit(100)
+	params.SetSort(bson.D{{"departuretime", -1}})
+	filter := []bson.M{bson.M{"departuretraffichub.code": "(" + value + ")"}}
+
+	if value == "KBP" {
+		filter = []bson.M{
+			bson.M{"departuretraffichub.code": "(" + value + ")"},
+			bson.M{"departuretraffichub.code": "(" + value + " F)"},
+		}
+	}
+
+	var results []*Flight
+
+	cur, err := collection.Find(context.Background(), bson.M{"$or": filter})
+
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem Flight
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		results = append(results, &elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the cursor once finished
+	cur.Close(context.TODO())
+
+	return results, err
+}
+
+func FindArriving(collection *mongo.Collection, value string) ([]*Flight, error) {
+	if value == "" {
+		return FindAll(collection)
+	}
+
+	params := options.Find()
+	params.SetLimit(100)
+	filter := []bson.M{bson.M{"arrivaltraffichub.code": "(" + value + ")"}}
+
+	if value == "KBP" {
+		filter = []bson.M{
+			bson.M{"arrivaltraffichub.code": "(" + value + ")"},
+			bson.M{"arrivaltraffichub.code": "(" + value + " F)"},
+		}
+	}
+
+	var results []*Flight
+
+	cur, err := collection.Find(context.Background(), bson.M{"$and": filter})
 
 	for cur.Next(context.TODO()) {
 		// create a value into which the single document can be decoded
