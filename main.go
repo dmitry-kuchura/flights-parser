@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"skyup/utils"
+	"skyup-parser/utils"
 
 	"github.com/joho/godotenv"
 )
