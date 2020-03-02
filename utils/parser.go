@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"skyup/models"
+	"skyup-parser/models"
 
 	"github.com/PuerkitoBio/goquery"
 )

@@ -1,4 +1,4 @@
-module skyup
+module skyup-parser
 
 go 1.13
 
