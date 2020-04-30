@@ -45,11 +45,11 @@ func prepareData(data []byte) {
 	}
 
 	//Find each table
-	doc.Find(".board__body").Each(func(index int, boardBody *goquery.Selection) {
+	doc.Find(".board__body").Each(func(i int, boardBody *goquery.Selection) {
 		items := boardBody.Find("[data-content='yesterday']")
 		plane := Plane{}
 
-		items.Find(".board__item").Each(func(indexItems int, boardItem *goquery.Selection) {
+		items.Find(".board__item").Each(func(i int, boardItem *goquery.Selection) {
 			flightNumber := boardItem.Find(".board__flight p").First().Text()
 
 			boardItem.Find(".flight-board__cont").Each(func(i int, flightPlaneInfo *goquery.Selection) {
@@ -92,15 +92,24 @@ func prepareData(data []byte) {
 						arrivalHub := arrival[len(arrival)-4:]
 
 						arrivalTrafficHubName = strings.TrimSpace(arrival[:strings.IndexByte(arrival, '(')])
-						departureTrafficHub = strings.TrimSpace(arrivalHub[:strings.IndexByte(arrivalHub, ')')])
+						arrivalTrafficHub = strings.TrimSpace(arrivalHub[:strings.IndexByte(arrivalHub, ')')])
 					}
 				})
 			})
 
-			departureTime := boardItem.Find(".board__departure-time").Text()
-			arrivalTime := boardItem.Find(".board__arrival-time").Text()
-			boardStatus := boardItem.Find(".board__status").Text()
-			isCharter := boardItem.Find(".board__charter-text").Text()
+			departureTime := ""
+			arrivalTime := ""
+
+			boardItem.Find(".board__departure").Each(func(i int, departure *goquery.Selection) {
+				departureTime = departure.Find(".board__time").Text()
+			})
+
+			boardItem.Find(".board__arrival").Each(func(i int, arrival *goquery.Selection) {
+				arrivalTime = arrival.Find(".board__time").Text()
+			})
+
+			boardStatus := strings.TrimSpace(boardItem.Find(".board__status").First().Text())
+			isCharter := boardItem.Find(".board__status--charter").Text()
 
 			flight := Flight{
 				Number:              strings.TrimSpace(flightNumber),
@@ -116,26 +125,27 @@ func prepareData(data []byte) {
 			flights = append(flights, flight)
 		})
 	})
-
-	collection := GetConnection()
-
-	for x := range flights {
-		row := Flight{
-			Number:              flights[x].Number,
-			Info:                flights[x].Info,
-			DepartureTrafficHub: flights[x].DepartureTrafficHub,
-			ArrivalTrafficHub:   flights[x].ArrivalTrafficHub,
-			DepartureTime:       flights[x].DepartureTime,
-			ArrivalTime:         flights[x].ArrivalTime,
-			BoardStatus:         flights[x].BoardStatus,
-		}
-
-		_, err := FindOne(collection, flights[x].Number)
-
-		if err == nil {
-			UpdateOne(collection, row.Number, row)
-		} else {
-			InsertOne(collection, row)
-		}
-	}
+	fmt.Print(flights)
+	//
+	//collection := GetConnection()
+	//
+	//for x := range flights {
+	//	row := Flight{
+	//		Number:              flights[x].Number,
+	//		Info:                flights[x].Info,
+	//		DepartureTrafficHub: flights[x].DepartureTrafficHub,
+	//		ArrivalTrafficHub:   flights[x].ArrivalTrafficHub,
+	//		DepartureTime:       flights[x].DepartureTime,
+	//		ArrivalTime:         flights[x].ArrivalTime,
+	//		BoardStatus:         flights[x].BoardStatus,
+	//	}
+	//
+	//	_, err := FindOne(collection, flights[x].Number)
+	//
+	//	if err == nil {
+	//		UpdateOne(collection, row.Number, row)
+	//	} else {
+	//		InsertOne(collection, row)
+	//	}
+	//}
 }
