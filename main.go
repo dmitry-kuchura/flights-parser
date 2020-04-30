@@ -25,6 +25,5 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	//syncFlights()
-	utils.Parse()
+	syncFlights()
 }
