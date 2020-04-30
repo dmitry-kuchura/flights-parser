@@ -10,7 +10,7 @@ import (
 )
 
 func syncFlights() {
-	pollInterval := 60000
+	pollInterval := 10000
 
 	timerCh := time.Tick(time.Duration(pollInterval) * time.Millisecond)
 
@@ -25,5 +25,6 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	syncFlights()
+	//syncFlights()
+	utils.Parse()
 }
