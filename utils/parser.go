@@ -125,27 +125,26 @@ func prepareData(data []byte) {
 			flights = append(flights, flight)
 		})
 	})
-	fmt.Print(flights)
-	//
-	//collection := GetConnection()
-	//
-	//for x := range flights {
-	//	row := Flight{
-	//		Number:              flights[x].Number,
-	//		Info:                flights[x].Info,
-	//		DepartureTrafficHub: flights[x].DepartureTrafficHub,
-	//		ArrivalTrafficHub:   flights[x].ArrivalTrafficHub,
-	//		DepartureTime:       flights[x].DepartureTime,
-	//		ArrivalTime:         flights[x].ArrivalTime,
-	//		BoardStatus:         flights[x].BoardStatus,
-	//	}
-	//
-	//	_, err := FindOne(collection, flights[x].Number)
-	//
-	//	if err == nil {
-	//		UpdateOne(collection, row.Number, row)
-	//	} else {
-	//		InsertOne(collection, row)
-	//	}
-	//}
+
+	collection := GetConnection()
+
+	for x := range flights {
+		row := Flight{
+			Number:              flights[x].Number,
+			Info:                flights[x].Info,
+			DepartureTrafficHub: flights[x].DepartureTrafficHub,
+			ArrivalTrafficHub:   flights[x].ArrivalTrafficHub,
+			DepartureTime:       flights[x].DepartureTime,
+			ArrivalTime:         flights[x].ArrivalTime,
+			BoardStatus:         flights[x].BoardStatus,
+		}
+
+		_, err := FindOne(collection, flights[x].Number)
+
+		if err == nil {
+			UpdateOne(collection, row.Number, row)
+		} else {
+			InsertOne(collection, row)
+		}
+	}
 }
